@@ -119,6 +119,14 @@ class DiceManager {
       return dice;
     });
   }
+
+  // Spiel zurücksetzen
+  resetGame(): void {
+    this.state = {
+      dice: this.initializeDice(),
+      activeMonsterZones: 1
+    };
+  }
 }
 
 export const diceManager = new DiceManager(); 

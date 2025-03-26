@@ -27,7 +27,7 @@ interface DiceZoneProps {
   zone: DiceZone;
   dice: Dice[];
   onDrop: (diceIds: string[], zone: DiceZone) => void;
-  onReroll?: () => void;
+  onReroll?: (selectedDice: string[]) => void;
   rerollCount?: number;
   style?: React.CSSProperties;
 }
@@ -76,6 +76,12 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
     e.dataTransfer.setData('diceIds', Array.from(currentSelection).join(','));
   };
 
+  const handleReroll = () => {
+    if (onReroll) {
+      onReroll(Array.from(selectedDice));
+    }
+  };
+
   return (
     <div
       style={{
@@ -97,7 +103,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
               Würfe: {rerollCount || 0}
             </span>
             <button
-              onClick={onReroll}
+              onClick={handleReroll}
               style={{
                 padding: '4px 8px',
                 backgroundColor: '#4CAF50',

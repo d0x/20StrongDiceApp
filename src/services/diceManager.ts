@@ -48,12 +48,18 @@ class DiceManager {
       }
     }
 
+    // Finde die Würfel, die tatsächlich in eine neue Zone verschoben werden
+    const diceToMove = this.state.dice.filter(dice => 
+      diceIds.includes(dice.id) && dice.zone !== newZone
+    );
+
     this.state.dice = this.state.dice.map(dice => {
       if (diceIds.includes(dice.id)) {
         return {
           ...dice,
           zone: newZone,
-          hidden: !newZone.startsWith('monster')
+          // Nur Würfel verstecken, die tatsächlich in eine neue Zone verschoben wurden
+          hidden: diceToMove.includes(dice) ? !newZone.startsWith('monster') : dice.hidden
         };
       }
       return dice;
@@ -66,9 +72,10 @@ class DiceManager {
   }
 
   // Alle Würfel in einer Zone neu würfeln
-  rerollDiceInZone(zone: DiceZone): void {
+  rerollDiceInZone(zone: DiceZone, selectedDiceIds: string[] = []): void {
     this.state.dice = this.state.dice.map(dice => {
-      if (dice.zone === zone) {
+      // Wenn Würfel in der Zone sind und entweder keine Würfel ausgewählt sind oder der Würfel ausgewählt ist
+      if (dice.zone === zone && (selectedDiceIds.length === 0 || selectedDiceIds.includes(dice.id))) {
         return {
           ...dice,
           value: this.rollDice(),

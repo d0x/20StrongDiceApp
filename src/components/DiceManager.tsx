@@ -27,8 +27,8 @@ export const DiceManager: React.FC = () => {
     setShowResetConfirm(false);
   };
 
-  const handleReroll = () => {
-    diceManager.rerollDiceInZone('muster');
+  const handleReroll = (selectedDiceIds: string[]) => {
+    diceManager.rerollDiceInZone('muster', selectedDiceIds);
     setState(diceManager.getState());
   };
 

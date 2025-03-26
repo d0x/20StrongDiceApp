@@ -59,12 +59,21 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
   };
 
   const handleDragStart = (e: React.DragEvent) => {
-    // Wenn der gezogene Würfel nicht ausgewählt ist, wähle nur ihn aus
     const diceId = e.currentTarget.getAttribute('data-dice-id');
-    if (diceId && !selectedDice.has(diceId)) {
-      setSelectedDice(new Set([diceId]));
+    if (!diceId) return;
+
+    // Wenn der gezogene Würfel nicht ausgewählt ist, füge ihn zur bestehenden Auswahl hinzu
+    if (!selectedDice.has(diceId)) {
+      setSelectedDice(prev => {
+        const newSelection = new Set(prev);
+        newSelection.add(diceId);
+        return newSelection;
+      });
     }
-    e.dataTransfer.setData('diceIds', Array.from(selectedDice).join(','));
+
+    // Verwende die aktuelle Auswahl für den Drag & Drop
+    const currentSelection = selectedDice.has(diceId) ? selectedDice : new Set([...selectedDice, diceId]);
+    e.dataTransfer.setData('diceIds', Array.from(currentSelection).join(','));
   };
 
   return (

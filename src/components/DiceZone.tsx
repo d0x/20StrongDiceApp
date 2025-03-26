@@ -27,10 +27,11 @@ interface DiceZoneProps {
   zone: DiceZone;
   dice: Dice[];
   onDrop: (diceId: string, zone: DiceZone) => void;
+  onReroll?: () => void;
   style?: React.CSSProperties;
 }
 
-export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop, style }) => {
+export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop, onReroll, style }) => {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
@@ -54,7 +55,25 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <div style={{ marginBottom: '5px', fontWeight: 'bold' }}>{getZoneName(zone)}</div>
+      <div style={{ marginBottom: '5px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>{getZoneName(zone)}</span>
+        {zone === 'muster' && onReroll && (
+          <button
+            onClick={onReroll}
+            style={{
+              padding: '4px 8px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            Neu Würfeln
+          </button>
+        )}
+      </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
         {dice.map(die => (
           <div

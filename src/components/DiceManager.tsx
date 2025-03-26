@@ -27,6 +27,11 @@ export const DiceManager: React.FC = () => {
     setShowResetConfirm(false);
   };
 
+  const handleReroll = () => {
+    diceManager.rerollDiceInZone('muster');
+    setState(diceManager.getState());
+  };
+
   return (
     <div style={{ 
       height: '100vh',
@@ -88,6 +93,7 @@ export const DiceManager: React.FC = () => {
             zone="muster"
             dice={state.dice.filter(d => d.zone === 'muster')}
             onDrop={handleDrop}
+            onReroll={handleReroll}
             style={{ flex: 1 }}
           />
         </div>

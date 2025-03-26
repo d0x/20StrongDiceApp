@@ -35,94 +35,127 @@ export const DiceManager: React.FC = () => {
   return (
     <div style={{ 
       height: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
+      display: 'grid',
+      gridTemplateAreas: `
+        "banished banished"
+        "exhausted pool"
+        "exhaust-button pool"
+        "monsters muster"
+      `,
+      gridTemplateRows: 'auto auto auto 1fr',
+      gridTemplateColumns: '200px 1fr',
+      gap: '10px',
+      padding: '10px',
       overflow: 'hidden'
     }}>
-      {/* Header - Verbannt Zone */}
-      <div style={{ padding: '10px', borderBottom: '1px solid #ccc' }}>
+      {/* Verbannt Zone */}
+      <div style={{ gridArea: 'banished' }}>
         <DiceZoneComponent
           zone="banished"
           dice={state.dice.filter(d => d.zone === 'banished')}
           onDrop={handleDrop}
-          style={{ width: '100%', minHeight: '60px' }}
         />
       </div>
 
-      {/* Scrollbarer Content */}
+      {/* Erschöpft Zone */}
+      <div style={{ gridArea: 'exhausted' }}>
+        <DiceZoneComponent
+          zone="exhausted"
+          dice={state.dice.filter(d => d.zone === 'exhausted')}
+          onDrop={handleDrop}
+        />
+      </div>
+
+      {/* Würfelpool */}
+      <div style={{ gridArea: 'pool' }}>
+        <DiceZoneComponent
+          zone="pool"
+          dice={state.dice.filter(d => d.zone === 'pool')}
+          onDrop={handleDrop}
+        />
+      </div>
+
+      {/* Erschöpfen Button */}
       <div style={{ 
-        flex: 1,
-        overflow: 'auto',
-        padding: '10px',
+        gridArea: 'exhaust-button',
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        <button 
+          onClick={handleExhaust}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          Erschöpfen
+        </button>
+      </div>
+
+      {/* Monster Zonen */}
+      <div style={{ 
+        gridArea: 'monsters',
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px'
+        gap: '10px'
       }}>
-        {/* Mittlerer Bereich - Erschöpft links, Pool rechts */}
-        <div style={{ display: 'flex', gap: '20px', flex: 1 }}>
+        {Array.from({ length: state.activeMonsterZones }, (_, i) => (
           <DiceZoneComponent
-            zone="exhausted"
-            dice={state.dice.filter(d => d.zone === 'exhausted')}
+            key={`monster${i + 1}`}
+            zone={`monster${i + 1}` as DiceZoneType}
+            dice={state.dice.filter(d => d.zone === `monster${i + 1}`)}
             onDrop={handleDrop}
-            style={{ width: '200px' }}
           />
-          <DiceZoneComponent
-            zone="pool"
-            dice={state.dice.filter(d => d.zone === 'pool')}
-            onDrop={handleDrop}
-            style={{ flex: 1 }}
-          />
-        </div>
+        ))}
+      </div>
 
-        {/* Unterer Bereich - Monster links, Aufmarsch rechts */}
-        <div style={{ display: 'flex', gap: '20px' }}>
-          {/* Monster Zonen */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '200px' }}>
-            {Array.from({ length: state.activeMonsterZones }, (_, i) => (
-              <DiceZoneComponent
-                key={`monster${i + 1}`}
-                zone={`monster${i + 1}` as DiceZoneType}
-                dice={state.dice.filter(d => d.zone === `monster${i + 1}`)}
-                onDrop={handleDrop}
-              />
-            ))}
-          </div>
-
-          {/* Aufmarsch Zone */}
-          <DiceZoneComponent
-            zone="muster"
-            dice={state.dice.filter(d => d.zone === 'muster')}
-            onDrop={handleDrop}
-            onReroll={handleReroll}
-            rerollCount={state.rerollCounter}
-            style={{ flex: 1 }}
-          />
-        </div>
+      {/* Aufmarsch Zone */}
+      <div style={{ 
+        gridArea: 'muster',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px'
+      }}>
+        <DiceZoneComponent
+          zone="muster"
+          dice={state.dice.filter(d => d.zone === 'muster')}
+          onDrop={handleDrop}
+          onReroll={handleReroll}
+          rerollCount={state.rerollCounter}
+        />
       </div>
 
       {/* Footer - Kontrollen */}
       <div style={{ 
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
         padding: '10px',
         backgroundColor: '#f0f0f0',
-        borderTop: '1px solid #ccc'
+        borderTop: '1px solid #ccc',
+        display: 'flex',
+        gap: '10px'
       }}>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={handleExhaust}>Erschöpfen</button>
-          <button onClick={() => {
-            diceManager.setActiveMonsterZones(state.activeMonsterZones + 1);
-            setState(diceManager.getState());
-          }}>+ Monster</button>
-          <button onClick={() => {
-            diceManager.setActiveMonsterZones(state.activeMonsterZones - 1);
-            setState(diceManager.getState());
-          }}>- Monster</button>
-          <button 
-            onClick={() => setShowResetConfirm(true)}
-            style={{ marginLeft: 'auto', backgroundColor: '#ff4444', color: 'white' }}
-          >
-            Spiel zurücksetzen
-          </button>
-        </div>
+        <button onClick={() => {
+          diceManager.setActiveMonsterZones(state.activeMonsterZones + 1);
+          setState(diceManager.getState());
+        }}>+ Monster</button>
+        <button onClick={() => {
+          diceManager.setActiveMonsterZones(state.activeMonsterZones - 1);
+          setState(diceManager.getState());
+        }}>- Monster</button>
+        <button 
+          onClick={() => setShowResetConfirm(true)}
+          style={{ marginLeft: 'auto', backgroundColor: '#ff4444', color: 'white' }}
+        >
+          Spiel zurücksetzen
+        </button>
       </div>
 
       {/* Bestätigungsdialog */}

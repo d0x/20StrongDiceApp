@@ -26,21 +26,45 @@ const getZoneName = (zone: DiceZone): string => {
 interface DiceZoneProps {
   zone: DiceZone;
   dice: Dice[];
-  onDrop: (diceId: string, zone: DiceZone) => void;
+  onDrop: (diceIds: string[], zone: DiceZone) => void;
   onReroll?: () => void;
   rerollCount?: number;
   style?: React.CSSProperties;
 }
 
 export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop, onReroll, rerollCount, style }) => {
+  const [selectedDice, setSelectedDice] = React.useState<Set<string>>(new Set());
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const diceId = e.dataTransfer.getData('diceId');
-    onDrop(diceId, zone);
+    const diceIds = e.dataTransfer.getData('diceIds').split(',');
+    onDrop(diceIds, zone);
+  };
+
+  const handleDiceClick = (diceId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setSelectedDice(prev => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(diceId)) {
+        newSelection.delete(diceId);
+      } else {
+        newSelection.add(diceId);
+      }
+      return newSelection;
+    });
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    // Wenn der gezogene Würfel nicht ausgewählt ist, wähle nur ihn aus
+    const diceId = e.currentTarget.getAttribute('data-dice-id');
+    if (diceId && !selectedDice.has(diceId)) {
+      setSelectedDice(new Set([diceId]));
+    }
+    e.dataTransfer.setData('diceIds', Array.from(selectedDice).join(','));
   };
 
   return (
@@ -84,8 +108,10 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
         {dice.map(die => (
           <div
             key={die.id}
+            data-dice-id={die.id}
             draggable
-            onDragStart={(e) => e.dataTransfer.setData('diceId', die.id)}
+            onClick={(e) => handleDiceClick(die.id, e)}
+            onDragStart={handleDragStart}
             style={{
               width: '40px',
               height: '40px',
@@ -97,7 +123,8 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
               color: die.hidden ? 'transparent' : 'white',
               fontWeight: 'bold',
               cursor: 'move',
-              position: 'relative'
+              position: 'relative',
+              outline: selectedDice.has(die.id) ? '3px solid #4CAF50' : 'none',
             }}
           >
             {die.value}

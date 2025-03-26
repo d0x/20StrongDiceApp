@@ -11,8 +11,8 @@ export const DiceManager: React.FC = () => {
     // Hier können wir später Event-Listener für State-Änderungen hinzufügen
   }, []);
 
-  const handleDrop = (diceId: string, zone: DiceZoneType) => {
-    diceManager.moveDice(diceId, zone);
+  const handleDrop = (diceIds: string[], zone: DiceZoneType) => {
+    diceManager.moveDiceMultiple(diceIds, zone);
     setState(diceManager.getState());
   };
 

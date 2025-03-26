@@ -38,8 +38,8 @@ class DiceManager {
     return Math.floor(Math.random() * 6) + 1;
   }
 
-  // Würfel in eine neue Zone verschieben
-  moveDice(diceId: string, newZone: DiceZone): void {
+  // Mehrere Würfel in eine neue Zone verschieben
+  moveDiceMultiple(diceIds: string[], newZone: DiceZone): void {
     // Prüfen ob die Monster-Zone aktiv ist
     if (newZone.startsWith('monster')) {
       const monsterNumber = parseInt(newZone.replace('monster', ''));
@@ -48,14 +48,21 @@ class DiceManager {
       }
     }
 
-    const diceIndex = this.state.dice.findIndex(d => d.id === diceId);
-    if (diceIndex === -1) return;
+    this.state.dice = this.state.dice.map(dice => {
+      if (diceIds.includes(dice.id)) {
+        return {
+          ...dice,
+          zone: newZone,
+          hidden: !newZone.startsWith('monster')
+        };
+      }
+      return dice;
+    });
+  }
 
-    this.state.dice[diceIndex] = {
-      ...this.state.dice[diceIndex],
-      zone: newZone,
-      hidden: !newZone.startsWith('monster') // Nur in Monster-Zonen sichtbar
-    };
+  // Bestehende moveDice-Methode bleibt für Einzelwürfel
+  moveDice(diceId: string, newZone: DiceZone): void {
+    this.moveDiceMultiple([diceId], newZone);
   }
 
   // Alle Würfel in einer Zone neu würfeln

@@ -28,10 +28,11 @@ interface DiceZoneProps {
   dice: Dice[];
   onDrop: (diceId: string, zone: DiceZone) => void;
   onReroll?: () => void;
+  rerollCount?: number;
   style?: React.CSSProperties;
 }
 
-export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop, onReroll, style }) => {
+export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop, onReroll, rerollCount, style }) => {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
@@ -58,20 +59,25 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
       <div style={{ marginBottom: '5px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>{getZoneName(zone)}</span>
         {zone === 'muster' && onReroll && (
-          <button
-            onClick={onReroll}
-            style={{
-              padding: '4px 8px',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
-          >
-            Neu Würfeln
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '12px', color: '#666' }}>
+              Würfe: {rerollCount || 0}
+            </span>
+            <button
+              onClick={onReroll}
+              style={{
+                padding: '4px 8px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              Neu Würfeln
+            </button>
+          </div>
         )}
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
@@ -88,12 +94,25 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'white',
+              color: die.hidden ? 'transparent' : 'white',
               fontWeight: 'bold',
-              cursor: 'move'
+              cursor: 'move',
+              position: 'relative'
             }}
           >
             {die.value}
+            {die.hidden && (
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '20px',
+                height: '20px',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                borderRadius: '50%'
+              }} />
+            )}
           </div>
         ))}
       </div>

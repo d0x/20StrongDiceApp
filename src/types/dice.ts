@@ -7,11 +7,13 @@ export interface Dice {
   color: DiceColor;
   value: number;
   zone: DiceZone;
+  hidden: boolean; // Würfel ist verdeckt, bis er neu gewürfelt wird
 }
 
 export interface DiceState {
   dice: Dice[];
   activeMonsterZones: number; // Anzahl der aktiven Monster-Zonen (1-5)
+  rerollCounter: number; // Anzahl der Würfe in der Aufmarsch-Zone
 }
 
 export const INITIAL_DICE_COUNTS: Record<DiceColor, number> = {

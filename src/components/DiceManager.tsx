@@ -94,6 +94,7 @@ export const DiceManager: React.FC = () => {
             dice={state.dice.filter(d => d.zone === 'muster')}
             onDrop={handleDrop}
             onReroll={handleReroll}
+            rerollCount={state.rerollCounter}
             style={{ flex: 1 }}
           />
         </div>

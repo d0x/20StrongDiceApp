@@ -6,7 +6,8 @@ class DiceManager {
   constructor(activeMonsterZones: number = 1) {
     this.state = {
       dice: this.initializeDice(),
-      activeMonsterZones: this.validateMonsterZones(activeMonsterZones)
+      activeMonsterZones: this.validateMonsterZones(activeMonsterZones),
+      rerollCounter: 0
     };
   }
 
@@ -24,7 +25,8 @@ class DiceManager {
           id: `dice-${idCounter++}`,
           color: color as Dice['color'],
           value: this.rollDice(),
-          zone: 'pool'
+          zone: 'pool',
+          hidden: true // Alle Würfel starten verdeckt
         });
       }
     });
@@ -51,7 +53,8 @@ class DiceManager {
 
     this.state.dice[diceIndex] = {
       ...this.state.dice[diceIndex],
-      zone: newZone
+      zone: newZone,
+      hidden: !newZone.startsWith('monster') // Nur in Monster-Zonen sichtbar
     };
   }
 
@@ -61,11 +64,16 @@ class DiceManager {
       if (dice.zone === zone) {
         return {
           ...dice,
-          value: this.rollDice()
+          value: this.rollDice(),
+          hidden: false // Würfel wird beim Würfeln sichtbar
         };
       }
       return dice;
     });
+    
+    if (zone === 'muster') {
+      this.state.rerollCounter++;
+    }
   }
 
   // Würfel nach Farbe filtern
@@ -95,36 +103,28 @@ class DiceManager {
     this.state.activeMonsterZones = this.validateMonsterZones(count);
   }
 
-  // Würfel zurücksetzen
-  resetDice(): void {
-    this.state.dice = this.initializeDice();
-  }
-
-  // Prüfen ob eine Monster-Zone aktiv ist
-  isMonsterZoneActive(zone: DiceZone): boolean {
-    if (!zone.startsWith('monster')) return false;
-    const monsterNumber = parseInt(zone.replace('monster', ''));
-    return monsterNumber <= this.state.activeMonsterZones;
-  }
-
   // Würfel aus Aufmarsch und Monster-Zonen erschöpfen
   exhaustDice(): void {
     this.state.dice = this.state.dice.map(dice => {
       if (dice.zone === 'muster' || dice.zone.startsWith('monster')) {
         return {
           ...dice,
-          zone: 'exhausted'
+          zone: 'exhausted',
+          hidden: true // Würfel wird beim Erschöpfen verdeckt
         };
       }
       return dice;
     });
+    // Reset des Würfel-Counters beim Erschöpfen
+    this.state.rerollCounter = 0;
   }
 
   // Spiel zurücksetzen
   resetGame(): void {
     this.state = {
-      dice: this.initializeDice(),
-      activeMonsterZones: 1
+      dice: this.initializeDice(), // Alle Würfel starten verdeckt
+      activeMonsterZones: 1,
+      rerollCounter: 0
     };
   }
 }

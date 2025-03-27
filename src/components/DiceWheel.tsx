@@ -1,13 +1,13 @@
 import React from 'react';
 
-interface DiceValueSelectorProps {
+interface DiceWheelProps {
   onSelect: (value: number) => void;
   onRandom: () => void;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const DiceValueSelector: React.FC<DiceValueSelectorProps> = ({
+export const DiceWheel: React.FC<DiceWheelProps> = ({
   onSelect,
   onRandom,
   isOpen,

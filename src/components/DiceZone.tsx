@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dice } from '../types/dice';
 import type { DiceZone } from '../types/dice';
-import { DiceValueSelector } from './DiceValueSelector';
+import { DiceWheel } from './DiceWheel';
 import { diceManager } from '../services/diceManager';
 
 const getZoneName = (zone: DiceZone): string => {
@@ -298,7 +298,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
           </div>
         )}
       </div>
-      <DiceValueSelector
+      <DiceWheel
         isOpen={!!selectedDiceForValue}
         onClose={() => setSelectedDiceForValue(null)}
         onSelect={handleValueSelect}

@@ -153,7 +153,7 @@ export const DiceManager: React.FC = () => {
           onClick={handleExhaust}
           style={{
             padding: '8px 16px',
-            backgroundColor: '#4CAF50',
+            backgroundColor: '#ffa726',
             color: 'white',
             border: 'none',
             borderRadius: '4px',

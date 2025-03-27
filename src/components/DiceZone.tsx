@@ -92,17 +92,34 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
     e.stopPropagation();
   };
 
+  const getZoneStyle = (): React.CSSProperties => {
+    const baseStyle: React.CSSProperties = {
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      padding: '10px',
+      minHeight: '100px',
+      backgroundColor: '#f8f8f8',
+      ...style
+    };
+
+    switch (zone) {
+      case 'muster':
+        return { ...baseStyle, backgroundColor: '#e8f5e9' };
+      case 'exhausted':
+        return { ...baseStyle, backgroundColor: '#fff3e0' };
+      case 'banished':
+        return { ...baseStyle, backgroundColor: '#ffebee' };
+      case 'pool':
+        return { ...baseStyle, backgroundColor: '#e3f2fd' };
+      default:
+        return baseStyle;
+    }
+  };
+
   return (
     <div
       data-zone={zone}
-      style={{
-        border: '2px dashed #ccc',
-        borderRadius: '8px',
-        padding: '10px',
-        minHeight: '60px',
-        backgroundColor: isAddMonsterCard ? '#e8f5e9' : '#f5f5f5',
-        ...style
-      }}
+      style={getZoneStyle()}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onClick={handleZoneClick}

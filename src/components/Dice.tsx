@@ -1,5 +1,6 @@
 import React from 'react';
 import { Dice as DiceType } from '../types/dice';
+import { DICE_COLORS } from '../constants/diceColors';
 
 interface DiceProps {
   die: DiceType;
@@ -24,7 +25,7 @@ export const Dice: React.FC<DiceProps> = ({
       style={{
         width: '40px',
         height: '40px',
-        backgroundColor: die.color,
+        backgroundColor: DICE_COLORS[die.color],
         borderRadius: '8px',
         display: 'flex',
         alignItems: 'center',

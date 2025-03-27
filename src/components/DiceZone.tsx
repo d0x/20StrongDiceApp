@@ -31,6 +31,7 @@ interface DiceZoneProps {
   onReroll?: (selectedDice: string[]) => void;
   rerollCount?: number;
   onDiceSelect?: (diceId: string) => void;
+  onDelete?: () => void;
   style?: React.CSSProperties;
 }
 
@@ -42,6 +43,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
   onReroll, 
   rerollCount, 
   onDiceSelect,
+  onDelete,
   style 
 }) => {
   const handleDragOver = (e: React.DragEvent) => {
@@ -99,18 +101,36 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
     >
       <div style={{ marginBottom: '5px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>{getZoneName(zone)}</span>
-        {(zone === 'muster' || zone === 'exhausted') && onReroll && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {zone === 'muster' && (
-              <span style={{ fontSize: '12px', color: '#666' }}>
-                Würfe: {rerollCount || 0}
-              </span>
-            )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {(zone === 'muster' || zone === 'exhausted') && onReroll && (
+            <>
+              {zone === 'muster' && (
+                <span style={{ fontSize: '12px', color: '#666' }}>
+                  Würfe: {rerollCount || 0}
+                </span>
+              )}
+              <button
+                onClick={handleReroll}
+                style={{
+                  padding: '4px 8px',
+                  backgroundColor: '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                Neu Würfeln
+              </button>
+            </>
+          )}
+          {zone.startsWith('monster') && onDelete && (
             <button
-              onClick={handleReroll}
+              onClick={onDelete}
               style={{
                 padding: '4px 8px',
-                backgroundColor: '#4CAF50',
+                backgroundColor: '#ff4444',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
@@ -118,10 +138,10 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
                 fontSize: '12px'
               }}
             >
-              Neu Würfeln
+              🗑️
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
         {dice.map(die => (

@@ -52,6 +52,22 @@ export const DiceManager: React.FC = () => {
     setState(diceManager.getState());
   };
 
+  const handleDeleteZone = (monsterNumber: number) => {
+    // Verschiebe alle Würfel aus der Monster-Zone in den Pool
+    const zoneName = `monster${monsterNumber}` as DiceZoneType;
+    const diceInZone = state.dice.filter(d => d.zone === zoneName);
+    
+    // Erschöpfe die Würfel
+    diceManager.moveDiceMultiple(diceInZone.map(d => d.id), 'exhausted');
+    
+    // Reduziere die Anzahl der aktiven Monster-Zonen
+    if (state.activeMonsterZones > 1) {
+      diceManager.setActiveMonsterZones(state.activeMonsterZones - 1);
+    }
+    
+    setState(diceManager.getState());
+  };
+
   return (
     <div 
       style={{ 
@@ -147,6 +163,7 @@ export const DiceManager: React.FC = () => {
             allDice={state.dice}
             onDrop={handleDrop}
             onDiceSelect={handleDiceSelect}
+            onDelete={() => handleDeleteZone(i + 1)}
             style={{ flex: 1 }}
           />
         ))}

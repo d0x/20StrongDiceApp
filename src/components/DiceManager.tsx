@@ -197,6 +197,7 @@ export const DiceManager: React.FC = () => {
               diceManager.setActiveMonsterZones(state.activeMonsterZones + 1);
               setState(diceManager.getState());
             }}
+            activeMonsterZones={state.activeMonsterZones}
             style={{ flex: 1 }}
           />
         )}

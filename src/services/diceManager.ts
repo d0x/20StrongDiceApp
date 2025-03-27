@@ -73,9 +73,8 @@ class DiceManager {
         return {
           ...dice,
           zone: newZone,
-          // Nur Würfel verstecken, die tatsächlich in eine neue Zone verschoben wurden
-          // und NICHT in die Erschöpft-Zone
-          hidden: diceToMove.includes(dice) && newZone !== 'exhausted' ? !newZone.startsWith('monster') : dice.hidden,
+          // Nur in der Aufmarschzone das hidden-Flag ändern
+          hidden: diceToMove.includes(dice) && newZone === 'muster' ? false : dice.hidden,
           // Behalte die Auswahl bei
           selected: dice.selected
         };
@@ -206,6 +205,7 @@ class DiceManager {
     const dice = this.state.dice.find(d => d.id === diceId);
     if (dice) {
       dice.value = this.rollDiceValue();
+      dice.hidden = false;
       this.notifyListeners();
     }
   }

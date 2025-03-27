@@ -39,6 +39,7 @@ interface DiceZoneProps {
   onIncrementCounter?: () => void;
   onDecrementCounter?: () => void;
   style?: React.CSSProperties;
+  activeMonsterZones?: number;
 }
 
 export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ 
@@ -54,7 +55,8 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
   onAddMonster,
   onIncrementCounter,
   onDecrementCounter,
-  style 
+  style,
+  activeMonsterZones = 0
 }) => {
   const [selectedDiceForValue, setSelectedDiceForValue] = useState<string | null>(null);
 
@@ -65,7 +67,15 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const diceIds = e.dataTransfer.getData('diceIds').split(',');
-    onDrop(diceIds, zone);
+    
+    if (isAddMonsterCard && onAddMonster) {
+      // Erstelle neue Monster-Zone und verschiebe die Würfel dorthin
+      onAddMonster();
+      const newZone = `monster${activeMonsterZones + 1}` as DiceZone;
+      onDrop(diceIds, newZone);
+    } else {
+      onDrop(diceIds, zone);
+    }
   };
 
   const handleDiceClick = (diceId: string, e: React.MouseEvent) => {

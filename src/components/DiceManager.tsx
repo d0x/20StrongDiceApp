@@ -55,14 +55,16 @@ export const DiceManager: React.FC = () => {
     <div 
       style={{ 
         height: '100vh',
+        margin: 0,
         display: 'grid',
         gridTemplateAreas: `
           "banished banished"
           "exhausted pool"
           "exhaust-button pool"
           "monsters muster"
+          "footer footer"
         `,
-        gridTemplateRows: 'auto auto auto 1fr',
+        gridTemplateRows: 'auto auto auto 1fr auto',
         gridTemplateColumns: '200px 1fr',
         gap: '10px',
         padding: '10px',
@@ -70,35 +72,38 @@ export const DiceManager: React.FC = () => {
       }}
     >
       {/* Verbannt Zone */}
-      <div style={{ gridArea: 'banished' }}>
+      <div style={{ gridArea: 'banished', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <DiceZoneComponent
           zone="banished"
           dice={state.dice.filter(d => d.zone === 'banished')}
           allDice={state.dice}
           onDrop={handleDrop}
           onDiceSelect={handleDiceSelect}
+          style={{ flex: 1 }}
         />
       </div>
 
       {/* Erschöpft Zone */}
-      <div style={{ gridArea: 'exhausted' }}>
+      <div style={{ gridArea: 'exhausted', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <DiceZoneComponent
           zone="exhausted"
           dice={state.dice.filter(d => d.zone === 'exhausted')}
           allDice={state.dice}
           onDrop={handleDrop}
           onDiceSelect={handleDiceSelect}
+          style={{ flex: 1 }}
         />
       </div>
 
       {/* Würfelpool */}
-      <div style={{ gridArea: 'pool' }}>
+      <div style={{ gridArea: 'pool', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <DiceZoneComponent
           zone="pool"
           dice={state.dice.filter(d => d.zone === 'pool')}
           allDice={state.dice}
           onDrop={handleDrop}
           onDiceSelect={handleDiceSelect}
+          style={{ flex: 1 }}
         />
       </div>
 
@@ -129,7 +134,8 @@ export const DiceManager: React.FC = () => {
         gridArea: 'monsters',
         display: 'flex',
         flexDirection: 'column',
-        gap: '10px'
+        gap: '10px',
+        height: '100%'
       }}>
         {Array.from({ length: state.activeMonsterZones }, (_, i) => (
           <DiceZoneComponent
@@ -139,6 +145,7 @@ export const DiceManager: React.FC = () => {
             allDice={state.dice}
             onDrop={handleDrop}
             onDiceSelect={handleDiceSelect}
+            style={{ flex: 1 }}
           />
         ))}
       </div>
@@ -148,7 +155,8 @@ export const DiceManager: React.FC = () => {
         gridArea: 'muster',
         display: 'flex',
         flexDirection: 'column',
-        gap: '10px'
+        gap: '10px',
+        height: '100%'
       }}>
         <DiceZoneComponent
           zone="muster"
@@ -158,15 +166,13 @@ export const DiceManager: React.FC = () => {
           onReroll={handleReroll}
           rerollCount={state.rerollCounter}
           onDiceSelect={handleDiceSelect}
+          style={{ flex: 1 }}
         />
       </div>
 
       {/* Footer - Kontrollen */}
       <div style={{ 
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        gridArea: 'footer',
         padding: '10px',
         backgroundColor: '#f0f0f0',
         borderTop: '1px solid #ccc',

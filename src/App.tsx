@@ -1,5 +1,6 @@
 import React from 'react';
 import { DiceManager } from './components/DiceManager';
+import './styles/global.css';
 
 const App: React.FC = () => {
   return (

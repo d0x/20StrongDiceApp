@@ -92,6 +92,9 @@ class DiceManager {
     if (zone === 'muster') {
       this.state.rerollCounter++;
     }
+
+    // Alle Auswahlen aufheben
+    this.clearDiceSelection();
     this.notifyListeners();
   }
 

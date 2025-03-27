@@ -4,7 +4,7 @@ import { DiceWheel } from './DiceWheel';
 import { diceManager } from '../services/diceManager';
 import { DiceState, DiceZone as DiceZoneType } from '../types/dice';
 
-export const DiceManager: React.FC = () => {
+export const GameTable: React.FC = () => {
   const [state, setState] = useState<DiceState>(diceManager.getState());
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showValueSelector, setShowValueSelector] = useState(false);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { DiceManager } from './components/DiceManager';
+import { GameTable } from './components/GameTable';
 import './styles/global.css';
 
 const App: React.FC = () => {
@@ -10,7 +10,7 @@ const App: React.FC = () => {
       padding: 0,
       backgroundColor: '#1e1e1e'
     }}>
-      <DiceManager />
+      <GameTable />
     </div>
   );
 };

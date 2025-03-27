@@ -76,6 +76,16 @@ export const DiceManager: React.FC = () => {
     setState(diceManager.getState());
   };
 
+  const handleIncrementCounter = () => {
+    diceManager.incrementRerollCounter();
+    setState(diceManager.getState());
+  };
+
+  const handleDecrementCounter = () => {
+    diceManager.decrementRerollCounter();
+    setState(diceManager.getState());
+  };
+
   return (
     <div 
       style={{ 
@@ -208,6 +218,8 @@ export const DiceManager: React.FC = () => {
           onReroll={(selectedDiceIds) => handleReroll(selectedDiceIds, 'muster')}
           rerollCount={state.rerollCounter}
           onDiceSelect={handleDiceSelect}
+          onIncrementCounter={handleIncrementCounter}
+          onDecrementCounter={handleDecrementCounter}
           style={{ flex: 1 }}
         />
       </div>

@@ -11,6 +11,15 @@ class DiceManager {
     };
   }
 
+  decrementRerollCounter(): void {
+    this.state.rerollCounter = Math.max(0, this.state.rerollCounter - 1);
+  }
+
+  incrementRerollCounter(): void {
+    this.state.rerollCounter++;
+  }
+  
+
   private validateMonsterZones(count: number): number {
     return Math.max(1, Math.min(MAX_MONSTER_ZONES, count));
   }

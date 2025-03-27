@@ -34,6 +34,8 @@ interface DiceZoneProps {
   onDelete?: () => void;
   isAddMonsterCard?: boolean;
   onAddMonster?: () => void;
+  onIncrementCounter?: () => void;
+  onDecrementCounter?: () => void;
   style?: React.CSSProperties;
 }
 
@@ -48,6 +50,8 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
   onDelete,
   isAddMonsterCard,
   onAddMonster,
+  onIncrementCounter,
+  onDecrementCounter,
   style 
 }) => {
   const handleDragOver = (e: React.DragEvent) => {
@@ -109,9 +113,39 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
           {(zone === 'muster' || zone === 'exhausted') && onReroll && (
             <>
               {zone === 'muster' && (
-                <span style={{ fontSize: '12px', color: '#666' }}>
-                  Würfe: {rerollCount || 0}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <button
+                    onClick={onDecrementCounter}
+                    style={{
+                      padding: '2px 6px',
+                      backgroundColor: '#ff4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    -
+                  </button>
+                  <span style={{ fontSize: '12px', color: '#666' }}>
+                    Würfe: {rerollCount || 0}
+                  </span>
+                  <button
+                    onClick={onIncrementCounter}
+                    style={{
+                      padding: '2px 6px',
+                      backgroundColor: '#4CAF50',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
               )}
               <button
                 onClick={handleReroll}

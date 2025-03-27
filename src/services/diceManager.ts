@@ -26,7 +26,8 @@ class DiceManager {
           color: color as Dice['color'],
           value: this.rollDice(),
           zone: 'pool',
-          hidden: true // Alle Würfel starten verdeckt
+          hidden: true, // Alle Würfel starten verdeckt
+          selected: false // Kein Würfel ist initial ausgewählt
         });
       }
     });
@@ -59,7 +60,9 @@ class DiceManager {
           ...dice,
           zone: newZone,
           // Nur Würfel verstecken, die tatsächlich in eine neue Zone verschoben wurden
-          hidden: diceToMove.includes(dice) ? !newZone.startsWith('monster') : dice.hidden
+          hidden: diceToMove.includes(dice) ? !newZone.startsWith('monster') : dice.hidden,
+          // Behalte die Auswahl bei
+          selected: dice.selected
         };
       }
       return dice;
@@ -140,6 +143,41 @@ class DiceManager {
       activeMonsterZones: 1,
       rerollCounter: 0
     };
+  }
+
+  // Würfel auswählen/abwählen
+  toggleDiceSelection(diceId: string): void {
+    this.state.dice = this.state.dice.map(dice => {
+      if (dice.id === diceId) {
+        return {
+          ...dice,
+          selected: !dice.selected
+        };
+      }
+      return dice;
+    });
+  }
+
+  // Alle Würfel abwählen
+  clearDiceSelection(): void {
+    this.state.dice = this.state.dice.map(dice => ({
+      ...dice,
+      selected: false
+    }));
+  }
+
+  // Alle ausgewählten Würfel abrufen
+  getSelectedDice(): Dice[] {
+    return this.state.dice.filter(dice => dice.selected);
+  }
+
+  // Alle ausgewählten Würfel in eine neue Zone verschieben
+  moveSelectedDice(newZone: DiceZone): void {
+    const selectedDiceIds = this.getSelectedDice().map(dice => dice.id);
+    if (selectedDiceIds.length > 0) {
+      this.moveDiceMultiple(selectedDiceIds, newZone);
+      this.clearDiceSelection();
+    }
   }
 }
 

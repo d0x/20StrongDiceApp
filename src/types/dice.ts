@@ -8,6 +8,7 @@ export interface Dice {
   value: number;
   zone: DiceZone;
   hidden: boolean; // Würfel ist verdeckt, bis er neu gewürfelt wird
+  selected: boolean; // Würfel ist ausgewählt
 }
 
 export interface DiceState {

@@ -8,11 +8,30 @@ export const DiceManager: React.FC = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
-    // Hier können wir später Event-Listener für State-Änderungen hinzufügen
+    const handleGlobalClick = (e: MouseEvent) => {
+      // Prüfe, ob der Click auf einem Würfel oder in einer Zone war
+      const target = e.target as HTMLElement;
+      const isDice = target.closest('[data-dice-id]');
+      const isZone = target.closest('[data-zone]');
+      
+      if (!isDice && !isZone) {
+        diceManager.clearDiceSelection();
+        setState(diceManager.getState());
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick);
+    return () => window.removeEventListener('click', handleGlobalClick);
   }, []);
 
   const handleDrop = (diceIds: string[], zone: DiceZoneType) => {
     diceManager.moveDiceMultiple(diceIds, zone);
+    diceManager.clearDiceSelection();
+    setState(diceManager.getState());
+  };
+
+  const handleDiceSelect = (diceId: string) => {
+    diceManager.toggleDiceSelection(diceId);
     setState(diceManager.getState());
   };
 
@@ -33,27 +52,31 @@ export const DiceManager: React.FC = () => {
   };
 
   return (
-    <div style={{ 
-      height: '100vh',
-      display: 'grid',
-      gridTemplateAreas: `
-        "banished banished"
-        "exhausted pool"
-        "exhaust-button pool"
-        "monsters muster"
-      `,
-      gridTemplateRows: 'auto auto auto 1fr',
-      gridTemplateColumns: '200px 1fr',
-      gap: '10px',
-      padding: '10px',
-      overflow: 'hidden'
-    }}>
+    <div 
+      style={{ 
+        height: '100vh',
+        display: 'grid',
+        gridTemplateAreas: `
+          "banished banished"
+          "exhausted pool"
+          "exhaust-button pool"
+          "monsters muster"
+        `,
+        gridTemplateRows: 'auto auto auto 1fr',
+        gridTemplateColumns: '200px 1fr',
+        gap: '10px',
+        padding: '10px',
+        overflow: 'hidden'
+      }}
+    >
       {/* Verbannt Zone */}
       <div style={{ gridArea: 'banished' }}>
         <DiceZoneComponent
           zone="banished"
           dice={state.dice.filter(d => d.zone === 'banished')}
+          allDice={state.dice}
           onDrop={handleDrop}
+          onDiceSelect={handleDiceSelect}
         />
       </div>
 
@@ -62,7 +85,9 @@ export const DiceManager: React.FC = () => {
         <DiceZoneComponent
           zone="exhausted"
           dice={state.dice.filter(d => d.zone === 'exhausted')}
+          allDice={state.dice}
           onDrop={handleDrop}
+          onDiceSelect={handleDiceSelect}
         />
       </div>
 
@@ -71,7 +96,9 @@ export const DiceManager: React.FC = () => {
         <DiceZoneComponent
           zone="pool"
           dice={state.dice.filter(d => d.zone === 'pool')}
+          allDice={state.dice}
           onDrop={handleDrop}
+          onDiceSelect={handleDiceSelect}
         />
       </div>
 
@@ -109,7 +136,9 @@ export const DiceManager: React.FC = () => {
             key={`monster${i + 1}`}
             zone={`monster${i + 1}` as DiceZoneType}
             dice={state.dice.filter(d => d.zone === `monster${i + 1}`)}
+            allDice={state.dice}
             onDrop={handleDrop}
+            onDiceSelect={handleDiceSelect}
           />
         ))}
       </div>
@@ -124,9 +153,11 @@ export const DiceManager: React.FC = () => {
         <DiceZoneComponent
           zone="muster"
           dice={state.dice.filter(d => d.zone === 'muster')}
+          allDice={state.dice}
           onDrop={handleDrop}
           onReroll={handleReroll}
           rerollCount={state.rerollCounter}
+          onDiceSelect={handleDiceSelect}
         />
       </div>
 

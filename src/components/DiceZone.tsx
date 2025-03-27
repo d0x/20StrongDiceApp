@@ -26,15 +26,24 @@ const getZoneName = (zone: DiceZone): string => {
 interface DiceZoneProps {
   zone: DiceZone;
   dice: Dice[];
+  allDice: Dice[]; // Alle Würfel im Spiel
   onDrop: (diceIds: string[], zone: DiceZone) => void;
   onReroll?: (selectedDice: string[]) => void;
   rerollCount?: number;
+  onDiceSelect?: (diceId: string) => void;
   style?: React.CSSProperties;
 }
 
-export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop, onReroll, rerollCount, style }) => {
-  const [selectedDice, setSelectedDice] = React.useState<Set<string>>(new Set());
-
+export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ 
+  zone, 
+  dice,
+  allDice,
+  onDrop, 
+  onReroll, 
+  rerollCount, 
+  onDiceSelect,
+  style 
+}) => {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
@@ -47,43 +56,35 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
 
   const handleDiceClick = (diceId: string, e: React.MouseEvent) => {
     e.preventDefault();
-    setSelectedDice(prev => {
-      const newSelection = new Set(prev);
-      if (newSelection.has(diceId)) {
-        newSelection.delete(diceId);
-      } else {
-        newSelection.add(diceId);
-      }
-      return newSelection;
-    });
+    if (onDiceSelect) {
+      onDiceSelect(diceId);
+    }
   };
 
   const handleDragStart = (e: React.DragEvent) => {
     const diceId = e.currentTarget.getAttribute('data-dice-id');
     if (!diceId) return;
 
-    // Wenn der gezogene Würfel nicht ausgewählt ist, füge ihn zur bestehenden Auswahl hinzu
-    if (!selectedDice.has(diceId)) {
-      setSelectedDice(prev => {
-        const newSelection = new Set(prev);
-        newSelection.add(diceId);
-        return newSelection;
-      });
-    }
-
-    // Verwende die aktuelle Auswahl für den Drag & Drop
-    const currentSelection = selectedDice.has(diceId) ? selectedDice : new Set([...selectedDice, diceId]);
-    e.dataTransfer.setData('diceIds', Array.from(currentSelection).join(','));
+    // Verwende alle ausgewählten Würfel aus allen Zonen für den Drag & Drop
+    const selectedDiceIds = allDice.filter(d => d.selected).map(d => d.id);
+    const currentSelection = selectedDiceIds.length > 0 ? selectedDiceIds : [diceId];
+    e.dataTransfer.setData('diceIds', currentSelection.join(','));
   };
 
   const handleReroll = () => {
     if (onReroll) {
-      onReroll(Array.from(selectedDice));
+      const selectedDiceIds = dice.filter(d => d.selected).map(d => d.id);
+      onReroll(selectedDiceIds);
     }
+  };
+
+  const handleZoneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
     <div
+      data-zone={zone}
       style={{
         border: '2px dashed #ccc',
         borderRadius: '8px',
@@ -94,6 +95,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
       }}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onClick={handleZoneClick}
     >
       <div style={{ marginBottom: '5px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>{getZoneName(zone)}</span>
@@ -139,7 +141,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ zone, dice, onDrop,
               fontWeight: 'bold',
               cursor: 'move',
               position: 'relative',
-              outline: selectedDice.has(die.id) ? '3px solid #4CAF50' : 'none',
+              outline: die.selected ? '3px solid #4CAF50' : 'none',
             }}
           >
             {die.value}

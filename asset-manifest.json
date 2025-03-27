@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/d0x/20StrongDiceApp/static/css/main.2b7a0c6a.css",
+    "main.js": "/d0x/20StrongDiceApp/static/js/main.dbcb4cbf.js",
+    "index.html": "/d0x/20StrongDiceApp/index.html",
+    "main.2b7a0c6a.css.map": "/d0x/20StrongDiceApp/static/css/main.2b7a0c6a.css.map",
+    "main.dbcb4cbf.js.map": "/d0x/20StrongDiceApp/static/js/main.dbcb4cbf.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2b7a0c6a.css",
+    "static/js/main.dbcb4cbf.js"
+  ]
+}

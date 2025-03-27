@@ -229,8 +229,8 @@ export const DiceManager: React.FC = () => {
       <div style={{ 
         gridArea: 'footer',
         padding: '10px',
-        backgroundColor: '#f0f0f0',
-        borderTop: '1px solid #ccc',
+        backgroundColor: '#2a2a2a',
+        borderTop: '1px solid #444',
         display: 'flex',
         gap: '10px'
       }}>
@@ -257,19 +257,39 @@ export const DiceManager: React.FC = () => {
           zIndex: 1000
         }}>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: '#2a2a2a',
             padding: '20px',
             borderRadius: '8px',
             maxWidth: '400px',
-            width: '90%'
+            width: '90%',
+            color: '#fff'
           }}>
             <h3 style={{ marginTop: 0 }}>Spiel zurücksetzen?</h3>
             <p>Möchten Sie das Spiel wirklich zurücksetzen? Alle Würfel werden in den Pool zurückgelegt und die Monster-Zonen auf 1 zurückgesetzt.</p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowResetConfirm(false)}>Abbrechen</button>
+              <button 
+                onClick={() => setShowResetConfirm(false)}
+                style={{
+                  backgroundColor: '#3a3a3a',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Abbrechen
+              </button>
               <button 
                 onClick={handleReset}
-                style={{ backgroundColor: '#ff4444', color: 'white' }}
+                style={{ 
+                  backgroundColor: '#ff4444', 
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
               >
                 Zurücksetzen
               </button>

@@ -113,23 +113,30 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
 
   const getZoneStyle = (): React.CSSProperties => {
     const baseStyle: React.CSSProperties = {
-      border: '1px solid #ccc',
+      border: '1px solid #444',
       borderRadius: '4px',
       padding: '10px',
       minHeight: '100px',
-      backgroundColor: '#f8f8f8',
+      backgroundColor: '#1a1a1a',
+      color: '#fff',
       ...style
     };
 
     switch (zone) {
       case 'muster':
-        return { ...baseStyle, backgroundColor: '#e8f5e9' };
+        return { ...baseStyle, backgroundColor: '#1b2a1b' };
       case 'exhausted':
-        return { ...baseStyle, backgroundColor: '#fff3e0' };
+        return { ...baseStyle, backgroundColor: '#2a1f1b' };
       case 'banished':
-        return { ...baseStyle, backgroundColor: '#ffebee' };
+        return { ...baseStyle, backgroundColor: '#2a1b1b' };
       case 'pool':
-        return { ...baseStyle, backgroundColor: '#e3f2fd' };
+        return { ...baseStyle, backgroundColor: '#1b1f2a' };
+      case 'monster1':
+      case 'monster2':
+      case 'monster3':
+      case 'monster4':
+      case 'monster5':
+        return { ...baseStyle, backgroundColor: '#2a1b2a' };
       default:
         return baseStyle;
     }

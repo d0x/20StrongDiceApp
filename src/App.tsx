@@ -8,7 +8,7 @@ const App: React.FC = () => {
       height: '100vh',
       margin: 0,
       padding: 0,
-      backgroundColor: '#f0f0f0'
+      backgroundColor: '#1e1e1e'
     }}>
       <DiceManager />
     </div>

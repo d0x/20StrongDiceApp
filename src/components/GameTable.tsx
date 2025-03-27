@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DiceZoneComponent } from './DiceZone';
 import { diceManager } from '../services/diceManager';
 import { DiceState, DiceZone as DiceZoneType } from '../types/dice';

@@ -63,29 +63,18 @@ class DiceManager {
       }
     }
 
-    // Finde die Würfel, die tatsächlich in eine neue Zone verschoben werden
-    const diceToMove = this.state.dice.filter(dice => 
-      diceIds.includes(dice.id) && dice.zone !== newZone
-    );
-
     this.state.dice = this.state.dice.map(dice => {
       if (diceIds.includes(dice.id)) {
         return {
           ...dice,
           zone: newZone,
-          // Nur in der Aufmarschzone das hidden-Flag ändern
-          hidden: diceToMove.includes(dice) && newZone === 'muster' ? false : dice.hidden,
+          hidden: newZone === 'pool' ? true : dice.hidden,
           // Behalte die Auswahl bei
           selected: dice.selected
         };
       }
       return dice;
     });
-  }
-
-  // Bestehende moveDice-Methode bleibt für Einzelwürfel
-  moveDice(diceId: string, newZone: DiceZone): void {
-    this.moveDiceMultiple([diceId], newZone);
   }
 
   public rerollDiceInZone(zone: DiceZone, selectedDiceIds: string[] = []): void {
@@ -104,23 +93,6 @@ class DiceManager {
       this.state.rerollCounter++;
     }
     this.notifyListeners();
-  }
-
-  // Würfel nach Farbe filtern
-  getDiceByColor(color: Dice['color']): Dice[] {
-    return this.state.dice.filter(dice => dice.color === color);
-  }
-
-  // Würfel nach Zone filtern
-  getDiceByZone(zone: DiceZone): Dice[] {
-    return this.state.dice.filter(dice => dice.zone === zone);
-  }
-
-  // Alle Würfel in Monster-Zonen
-  getMonsterDice(): Dice[] {
-    return this.state.dice.filter(dice => 
-      dice.zone.startsWith('monster')
-    );
   }
 
   // Aktuellen State abrufen
@@ -181,15 +153,6 @@ class DiceManager {
   // Alle ausgewählten Würfel abrufen
   getSelectedDice(): Dice[] {
     return this.state.dice.filter(dice => dice.selected);
-  }
-
-  // Alle ausgewählten Würfel in eine neue Zone verschieben
-  moveSelectedDice(newZone: DiceZone): void {
-    const selectedDiceIds = this.getSelectedDice().map(dice => dice.id);
-    if (selectedDiceIds.length > 0) {
-      this.moveDiceMultiple(selectedDiceIds, newZone);
-      this.clearDiceSelection();
-    }
   }
 
   public setDiceValue(diceId: string, value: number): void {

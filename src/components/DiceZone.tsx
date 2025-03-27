@@ -3,6 +3,7 @@ import { Dice } from '../types/dice';
 import type { DiceZone } from '../types/dice';
 import { DiceWheel } from './DiceWheel';
 import { diceManager } from '../services/diceManager';
+import { Dice as DiceComponent } from './Dice';
 
 const getZoneName = (zone: DiceZone): string => {
   switch (zone) {
@@ -258,42 +259,13 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
         {!isAddMonsterCard && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
             {dice.map(die => (
-              <div
+              <DiceComponent
                 key={die.id}
-                data-dice-id={die.id}
-                draggable
-                onClick={(e) => handleDiceClick(die.id, e)}
+                die={die}
+                onClick={handleDiceClick}
                 onDragStart={handleDragStart}
-                onDoubleClick={(e) => handleDiceDoubleClick(die.id, e)}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  backgroundColor: die.color,
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: die.hidden ? 'transparent' : 'white',
-                  fontWeight: 'bold',
-                  cursor: 'move',
-                  position: 'relative',
-                  outline: die.selected ? '3px solid #4CAF50' : 'none',
-                }}
-              >
-                {die.value}
-                {die.hidden && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '20px',
-                    height: '20px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                    borderRadius: '50%'
-                  }} />
-                )}
-              </div>
+                onDoubleClick={handleDiceDoubleClick}
+              />
             ))}
           </div>
         )}

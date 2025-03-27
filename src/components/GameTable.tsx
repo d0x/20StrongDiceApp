@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DiceZoneComponent } from './DiceZone';
-import { DiceWheel } from './DiceWheel';
 import { diceManager } from '../services/diceManager';
 import { DiceState, DiceZone as DiceZoneType } from '../types/dice';
 
 export const GameTable: React.FC = () => {
   const [state, setState] = useState<DiceState>(diceManager.getState());
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [showValueSelector, setShowValueSelector] = useState(false);
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
@@ -86,14 +84,6 @@ export const GameTable: React.FC = () => {
   const handleDecrementCounter = () => {
     diceManager.decrementRerollCounter();
     setState(diceManager.getState());
-  };
-
-  const handleValueSelect = (value: number) => {
-    // Implementation of handleValueSelect
-  };
-
-  const handleRandomValue = () => {
-    // Implementation of handleRandomValue
   };
 
   return (
@@ -306,15 +296,6 @@ export const GameTable: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {showValueSelector && (
-        <DiceWheel
-          onSelect={handleValueSelect}
-          onRandom={handleRandomValue}
-          isOpen={showValueSelector}
-          onClose={() => setShowValueSelector(false)}
-        />
       )}
     </div>
   );

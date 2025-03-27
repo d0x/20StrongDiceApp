@@ -99,11 +99,13 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
     >
       <div style={{ marginBottom: '5px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>{getZoneName(zone)}</span>
-        {zone === 'muster' && onReroll && (
+        {(zone === 'muster' || zone === 'exhausted') && onReroll && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '12px', color: '#666' }}>
-              Würfe: {rerollCount || 0}
-            </span>
+            {zone === 'muster' && (
+              <span style={{ fontSize: '12px', color: '#666' }}>
+                Würfe: {rerollCount || 0}
+              </span>
+            )}
             <button
               onClick={handleReroll}
               style={{

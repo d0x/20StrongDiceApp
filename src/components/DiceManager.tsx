@@ -37,6 +37,7 @@ export const DiceManager: React.FC = () => {
 
   const handleExhaust = () => {
     diceManager.exhaustDice();
+    diceManager.setActiveMonsterZones(1);
     setState(diceManager.getState());
   };
 
@@ -46,8 +47,8 @@ export const DiceManager: React.FC = () => {
     setShowResetConfirm(false);
   };
 
-  const handleReroll = (selectedDiceIds: string[]) => {
-    diceManager.rerollDiceInZone('muster', selectedDiceIds);
+  const handleReroll = (selectedDiceIds: string[], zone: DiceZoneType) => {
+    diceManager.rerollDiceInZone(zone, selectedDiceIds);
     setState(diceManager.getState());
   };
 
@@ -91,6 +92,7 @@ export const DiceManager: React.FC = () => {
           allDice={state.dice}
           onDrop={handleDrop}
           onDiceSelect={handleDiceSelect}
+          onReroll={(selectedDiceIds) => handleReroll(selectedDiceIds, 'exhausted')}
           style={{ flex: 1 }}
         />
       </div>
@@ -163,7 +165,7 @@ export const DiceManager: React.FC = () => {
           dice={state.dice.filter(d => d.zone === 'muster')}
           allDice={state.dice}
           onDrop={handleDrop}
-          onReroll={handleReroll}
+          onReroll={(selectedDiceIds) => handleReroll(selectedDiceIds, 'muster')}
           rerollCount={state.rerollCounter}
           onDiceSelect={handleDiceSelect}
           style={{ flex: 1 }}

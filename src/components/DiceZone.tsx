@@ -17,7 +17,7 @@ const getZoneName = (zone: DiceZone): string => {
     case 'monster3':
     case 'monster4':
     case 'monster5':
-      return `Monster ${zone.replace('monster', '')}`;
+      return 'Monster';
     default:
       return zone;
   }
@@ -32,6 +32,8 @@ interface DiceZoneProps {
   rerollCount?: number;
   onDiceSelect?: (diceId: string) => void;
   onDelete?: () => void;
+  isAddMonsterCard?: boolean;
+  onAddMonster?: () => void;
   style?: React.CSSProperties;
 }
 
@@ -44,6 +46,8 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
   rerollCount, 
   onDiceSelect,
   onDelete,
+  isAddMonsterCard,
+  onAddMonster,
   style 
 }) => {
   const handleDragOver = (e: React.DragEvent) => {
@@ -92,7 +96,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
         borderRadius: '8px',
         padding: '10px',
         minHeight: '60px',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: isAddMonsterCard ? '#e8f5e9' : '#f5f5f5',
         ...style
       }}
       onDragOver={handleDragOver}
@@ -100,7 +104,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
       onClick={handleZoneClick}
     >
       <div style={{ marginBottom: '5px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span>{getZoneName(zone)}</span>
+        <span>{isAddMonsterCard ? 'Neue Monster-Zone' : getZoneName(zone)}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {(zone === 'muster' || zone === 'exhausted') && onReroll && (
             <>
@@ -141,47 +145,65 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
               🗑️
             </button>
           )}
+          {isAddMonsterCard && onAddMonster && (
+            <button
+              onClick={onAddMonster}
+              style={{
+                padding: '4px 8px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              +
+            </button>
+          )}
         </div>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-        {dice.map(die => (
-          <div
-            key={die.id}
-            data-dice-id={die.id}
-            draggable
-            onClick={(e) => handleDiceClick(die.id, e)}
-            onDragStart={handleDragStart}
-            style={{
-              width: '40px',
-              height: '40px',
-              backgroundColor: die.color,
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: die.hidden ? 'transparent' : 'white',
-              fontWeight: 'bold',
-              cursor: 'move',
-              position: 'relative',
-              outline: die.selected ? '3px solid #4CAF50' : 'none',
-            }}
-          >
-            {die.value}
-            {die.hidden && (
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '20px',
-                height: '20px',
-                backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                borderRadius: '50%'
-              }} />
-            )}
-          </div>
-        ))}
-      </div>
+      {!isAddMonsterCard && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+          {dice.map(die => (
+            <div
+              key={die.id}
+              data-dice-id={die.id}
+              draggable
+              onClick={(e) => handleDiceClick(die.id, e)}
+              onDragStart={handleDragStart}
+              style={{
+                width: '40px',
+                height: '40px',
+                backgroundColor: die.color,
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: die.hidden ? 'transparent' : 'white',
+                fontWeight: 'bold',
+                cursor: 'move',
+                position: 'relative',
+                outline: die.selected ? '3px solid #4CAF50' : 'none',
+              }}
+            >
+              {die.value}
+              {die.hidden && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '20px',
+                  height: '20px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: '50%'
+                }} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }; 

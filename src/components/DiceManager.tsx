@@ -60,6 +60,14 @@ export const DiceManager: React.FC = () => {
     // Erschöpfe die Würfel
     diceManager.moveDiceMultiple(diceInZone.map(d => d.id), 'exhausted');
     
+    // Verschiebe die Würfel aus den nachfolgenden Zonen nach oben
+    for (let i = monsterNumber; i < state.activeMonsterZones; i++) {
+      const currentZone = `monster${i + 1}` as DiceZoneType;
+      const nextZone = `monster${i}` as DiceZoneType;
+      const diceToMove = state.dice.filter(d => d.zone === currentZone);
+      diceManager.moveDiceMultiple(diceToMove.map(d => d.id), nextZone);
+    }
+    
     // Reduziere die Anzahl der aktiven Monster-Zonen
     if (state.activeMonsterZones > 1) {
       diceManager.setActiveMonsterZones(state.activeMonsterZones - 1);
@@ -163,10 +171,25 @@ export const DiceManager: React.FC = () => {
             allDice={state.dice}
             onDrop={handleDrop}
             onDiceSelect={handleDiceSelect}
-            onDelete={() => handleDeleteZone(i + 1)}
+            onDelete={state.activeMonsterZones > 1 ? () => handleDeleteZone(i + 1) : undefined}
             style={{ flex: 1 }}
           />
         ))}
+        {state.activeMonsterZones < 5 && (
+          <DiceZoneComponent
+            zone="monster1"
+            dice={[]}
+            allDice={state.dice}
+            onDrop={handleDrop}
+            onDiceSelect={handleDiceSelect}
+            isAddMonsterCard
+            onAddMonster={() => {
+              diceManager.setActiveMonsterZones(state.activeMonsterZones + 1);
+              setState(diceManager.getState());
+            }}
+            style={{ flex: 1 }}
+          />
+        )}
       </div>
 
       {/* Aufmarsch Zone */}
@@ -198,14 +221,6 @@ export const DiceManager: React.FC = () => {
         display: 'flex',
         gap: '10px'
       }}>
-        <button onClick={() => {
-          diceManager.setActiveMonsterZones(state.activeMonsterZones + 1);
-          setState(diceManager.getState());
-        }}>+ Monster</button>
-        <button onClick={() => {
-          diceManager.setActiveMonsterZones(state.activeMonsterZones - 1);
-          setState(diceManager.getState());
-        }}>- Monster</button>
         <button 
           onClick={() => setShowResetConfirm(true)}
           style={{ marginLeft: 'auto', backgroundColor: '#ff4444', color: 'white' }}

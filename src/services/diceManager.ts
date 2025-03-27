@@ -2,6 +2,7 @@ import { Dice, DiceState, DiceZone, INITIAL_DICE_COUNTS, MAX_MONSTER_ZONES } fro
 
 class DiceManager {
   private state: DiceState;
+  private listeners: ((state: DiceState) => void)[] = [];
 
   constructor(activeMonsterZones: number = 1) {
     this.state = {
@@ -24,6 +25,14 @@ class DiceManager {
     return Math.max(1, Math.min(MAX_MONSTER_ZONES, count));
   }
 
+  private notifyListeners(): void {
+    this.listeners.forEach(listener => listener(this.getState()));
+  }
+
+  private rollDiceValue(): number {
+    return Math.floor(Math.random() * 6) + 1;
+  }
+
   private initializeDice(): Dice[] {
     const dice: Dice[] = [];
     let idCounter = 0;
@@ -33,19 +42,15 @@ class DiceManager {
         dice.push({
           id: `dice-${idCounter++}`,
           color: color as Dice['color'],
-          value: this.rollDice(),
+          value: this.rollDiceValue(),
           zone: 'pool',
-          hidden: true, // Alle Würfel starten verdeckt
-          selected: false // Kein Würfel ist initial ausgewählt
+          hidden: true,
+          selected: false
         });
       }
     });
 
     return dice;
-  }
-
-  private rollDice(): number {
-    return Math.floor(Math.random() * 6) + 1;
   }
 
   // Mehrere Würfel in eine neue Zone verschieben
@@ -69,7 +74,8 @@ class DiceManager {
           ...dice,
           zone: newZone,
           // Nur Würfel verstecken, die tatsächlich in eine neue Zone verschoben wurden
-          hidden: diceToMove.includes(dice) ? !newZone.startsWith('monster') : dice.hidden,
+          // und NICHT in die Erschöpft-Zone
+          hidden: diceToMove.includes(dice) && newZone !== 'exhausted' ? !newZone.startsWith('monster') : dice.hidden,
           // Behalte die Auswahl bei
           selected: dice.selected
         };
@@ -83,15 +89,13 @@ class DiceManager {
     this.moveDiceMultiple([diceId], newZone);
   }
 
-  // Alle Würfel in einer Zone neu würfeln
-  rerollDiceInZone(zone: DiceZone, selectedDiceIds: string[] = []): void {
+  public rerollDiceInZone(zone: DiceZone, selectedDiceIds: string[] = []): void {
     this.state.dice = this.state.dice.map(dice => {
-      // Wenn Würfel in der Zone sind und entweder keine Würfel ausgewählt sind oder der Würfel ausgewählt ist
       if (dice.zone === zone && (selectedDiceIds.length === 0 || selectedDiceIds.includes(dice.id))) {
         return {
           ...dice,
-          value: this.rollDice(),
-          hidden: false // Würfel wird beim Würfeln sichtbar
+          value: this.rollDiceValue(),
+          hidden: false
         };
       }
       return dice;
@@ -100,6 +104,7 @@ class DiceManager {
     if (zone === 'muster') {
       this.state.rerollCounter++;
     }
+    this.notifyListeners();
   }
 
   // Würfel nach Farbe filtern
@@ -135,8 +140,7 @@ class DiceManager {
       if (dice.zone === 'muster' || dice.zone.startsWith('monster')) {
         return {
           ...dice,
-          zone: 'exhausted',
-          hidden: true // Würfel wird beim Erschöpfen verdeckt
+          zone: 'exhausted'
         };
       }
       return dice;
@@ -186,6 +190,23 @@ class DiceManager {
     if (selectedDiceIds.length > 0) {
       this.moveDiceMultiple(selectedDiceIds, newZone);
       this.clearDiceSelection();
+    }
+  }
+
+  public setDiceValue(diceId: string, value: number): void {
+    const dice = this.state.dice.find(d => d.id === diceId);
+    if (dice) {
+      dice.value = value;
+      dice.hidden = false;
+      this.notifyListeners();
+    }
+  }
+
+  public rollDice(diceId: string): void {
+    const dice = this.state.dice.find(d => d.id === diceId);
+    if (dice) {
+      dice.value = this.rollDiceValue();
+      this.notifyListeners();
     }
   }
 }

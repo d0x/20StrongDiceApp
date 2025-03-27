@@ -1,6 +1,7 @@
 {
   "name": "twentystrong",
   "version": "1.0.0",
+  "homepage": "https://d0x.github.io/20StrongDiceApp/",
   "private": true,
   "dependencies": {
     "@types/node": "^20.11.24",
@@ -15,7 +16,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [

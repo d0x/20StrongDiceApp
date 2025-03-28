@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { DiceZoneComponent } from './DiceZone';
 import { diceManager } from '../services/diceManager';
-import { DiceState, DiceZone as DiceZoneType } from '../types/dice';
+import { DiceZone as DiceZoneType } from '../types/dice';
+import { useDiceManager } from '../hooks/useDiceManager';
+import { buttonStyles } from '../utils/theme';
 
 export const GameTable: React.FC = () => {
-  const [state, setState] = useState<DiceState>(diceManager.getState());
+  const state = useDiceManager();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
@@ -16,7 +18,6 @@ export const GameTable: React.FC = () => {
       
       if (!isDice && !isZone) {
         diceManager.clearDiceSelection();
-        setState(diceManager.getState());
       }
     };
 
@@ -24,66 +25,22 @@ export const GameTable: React.FC = () => {
     return () => window.removeEventListener('click', handleGlobalClick);
   }, []);
 
-  const handleDrop = (diceIds: string[], zone: DiceZoneType) => {
-    diceManager.moveDiceMultiple(diceIds, zone);
-    diceManager.clearDiceSelection();
-    setState(diceManager.getState());
-  };
-
-  const handleDiceSelect = (diceId: string) => {
-    diceManager.toggleDiceSelection(diceId);
-    setState(diceManager.getState());
-  };
-
   const handleExhaust = () => {
     diceManager.exhaustDice();
     diceManager.setActiveMonsterZones(1);
-    setState(diceManager.getState());
   };
 
   const handleReset = () => {
     diceManager.resetGame();
-    setState(diceManager.getState());
     setShowResetConfirm(false);
-  };
-
-  const handleReroll = (selectedDiceIds: string[], zone: DiceZoneType) => {
-    diceManager.rerollDiceInZone(zone, selectedDiceIds);
-    setState(diceManager.getState());
-  };
-
-  const handleDeleteZone = (monsterNumber: number) => {
-    // Verschiebe alle Würfel aus der Monster-Zone in den Pool
-    const zoneName = `monster${monsterNumber}` as DiceZoneType;
-    const diceInZone = state.dice.filter(d => d.zone === zoneName);
-    
-    // Erschöpfe die Würfel
-    diceManager.moveDiceMultiple(diceInZone.map(d => d.id), 'exhausted');
-    
-    // Verschiebe die Würfel aus den nachfolgenden Zonen nach oben
-    for (let i = monsterNumber; i < state.activeMonsterZones; i++) {
-      const currentZone = `monster${i + 1}` as DiceZoneType;
-      const nextZone = `monster${i}` as DiceZoneType;
-      const diceToMove = state.dice.filter(d => d.zone === currentZone);
-      diceManager.moveDiceMultiple(diceToMove.map(d => d.id), nextZone);
-    }
-    
-    // Reduziere die Anzahl der aktiven Monster-Zonen
-    if (state.activeMonsterZones > 1) {
-      diceManager.setActiveMonsterZones(state.activeMonsterZones - 1);
-    }
-    
-    setState(diceManager.getState());
   };
 
   const handleIncrementCounter = () => {
     diceManager.incrementRerollCounter();
-    setState(diceManager.getState());
   };
 
   const handleDecrementCounter = () => {
     diceManager.decrementRerollCounter();
-    setState(diceManager.getState());
   };
 
   return (
@@ -110,10 +67,6 @@ export const GameTable: React.FC = () => {
       <div style={{ gridArea: 'banished', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <DiceZoneComponent
           zone="banished"
-          dice={state.dice.filter(d => d.zone === 'banished')}
-          allDice={state.dice}
-          onDrop={handleDrop}
-          onDiceSelect={handleDiceSelect}
           style={{ flex: 1 }}
         />
       </div>
@@ -122,11 +75,6 @@ export const GameTable: React.FC = () => {
       <div style={{ gridArea: 'exhausted', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <DiceZoneComponent
           zone="exhausted"
-          dice={state.dice.filter(d => d.zone === 'exhausted')}
-          allDice={state.dice}
-          onDrop={handleDrop}
-          onDiceSelect={handleDiceSelect}
-          onReroll={(selectedDiceIds) => handleReroll(selectedDiceIds, 'exhausted')}
           style={{ flex: 1 }}
         />
       </div>
@@ -135,10 +83,6 @@ export const GameTable: React.FC = () => {
       <div style={{ gridArea: 'pool', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <DiceZoneComponent
           zone="pool"
-          dice={state.dice.filter(d => d.zone === 'pool')}
-          allDice={state.dice}
-          onDrop={handleDrop}
-          onDiceSelect={handleDiceSelect}
           style={{ flex: 1 }}
         />
       </div>
@@ -152,12 +96,8 @@ export const GameTable: React.FC = () => {
         <button 
           onClick={handleExhaust}
           style={{
-            padding: '8px 16px',
-            backgroundColor: '#ffa726',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
+            ...buttonStyles.base,
+            ...buttonStyles.warning,
             fontSize: '14px'
           }}
         >
@@ -177,25 +117,16 @@ export const GameTable: React.FC = () => {
           <DiceZoneComponent
             key={`monster${i + 1}`}
             zone={`monster${i + 1}` as DiceZoneType}
-            dice={state.dice.filter(d => d.zone === `monster${i + 1}`)}
-            allDice={state.dice}
-            onDrop={handleDrop}
-            onDiceSelect={handleDiceSelect}
-            onDelete={state.activeMonsterZones > 1 ? () => handleDeleteZone(i + 1) : undefined}
+            onDelete={state.activeMonsterZones > 1 ? () => diceManager.handleDeleteZone(i + 1) : undefined}
             style={{ flex: 1 }}
           />
         ))}
         {state.activeMonsterZones < 5 && (
           <DiceZoneComponent
             zone="monster1"
-            dice={[]}
-            allDice={state.dice}
-            onDrop={handleDrop}
-            onDiceSelect={handleDiceSelect}
             isAddMonsterCard
             onAddMonster={() => {
               diceManager.setActiveMonsterZones(state.activeMonsterZones + 1);
-              setState(diceManager.getState());
             }}
             activeMonsterZones={state.activeMonsterZones}
             style={{ flex: 1 }}
@@ -213,12 +144,6 @@ export const GameTable: React.FC = () => {
       }}>
         <DiceZoneComponent
           zone="muster"
-          dice={state.dice.filter(d => d.zone === 'muster')}
-          allDice={state.dice}
-          onDrop={handleDrop}
-          onReroll={(selectedDiceIds) => handleReroll(selectedDiceIds, 'muster')}
-          rerollCount={state.rerollCounter}
-          onDiceSelect={handleDiceSelect}
           onIncrementCounter={handleIncrementCounter}
           onDecrementCounter={handleDecrementCounter}
           style={{ flex: 1 }}
@@ -236,7 +161,11 @@ export const GameTable: React.FC = () => {
       }}>
         <button 
           onClick={() => setShowResetConfirm(true)}
-          style={{ marginLeft: 'auto', backgroundColor: '#ff4444', color: 'white' }}
+          style={{ 
+            marginLeft: 'auto',
+            ...buttonStyles.base,
+            ...buttonStyles.danger
+          }}
         >
           Spiel zurücksetzen
         </button>
@@ -270,12 +199,8 @@ export const GameTable: React.FC = () => {
               <button 
                 onClick={() => setShowResetConfirm(false)}
                 style={{
-                  backgroundColor: '#3a3a3a',
-                  color: '#fff',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  ...buttonStyles.base,
+                  backgroundColor: '#3a3a3a'
                 }}
               >
                 Abbrechen
@@ -283,12 +208,8 @@ export const GameTable: React.FC = () => {
               <button 
                 onClick={handleReset}
                 style={{ 
-                  backgroundColor: '#ff4444', 
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  ...buttonStyles.base,
+                  ...buttonStyles.danger
                 }}
               >
                 Zurücksetzen

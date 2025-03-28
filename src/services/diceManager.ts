@@ -3,6 +3,7 @@ import { Dice, DiceState, DiceZone, INITIAL_DICE_COUNTS, MAX_MONSTER_ZONES } fro
 class DiceManager {
   private state: DiceState;
   private listeners: ((state: DiceState) => void)[] = [];
+  private selectedDiceForValue: string | null = null;
 
   constructor(activeMonsterZones: number = 1) {
     this.state = {
@@ -12,12 +13,22 @@ class DiceManager {
     };
   }
 
+  public subscribe(listener: (state: DiceState) => void): void {
+    this.listeners.push(listener);
+  }
+
+  public unsubscribe(listener: (state: DiceState) => void): void {
+    this.listeners = this.listeners.filter(l => l !== listener);
+  }
+
   decrementRerollCounter(): void {
     this.state.rerollCounter = Math.max(0, this.state.rerollCounter - 1);
+    this.notifyListeners();
   }
 
   incrementRerollCounter(): void {
     this.state.rerollCounter++;
+    this.notifyListeners();
   }
   
 
@@ -75,6 +86,7 @@ class DiceManager {
       }
       return dice;
     });
+    this.notifyListeners();
   }
 
   public rerollDiceInZone(zone: DiceZone, selectedDiceIds: string[] = []): void {
@@ -106,6 +118,7 @@ class DiceManager {
   // Anzahl der aktiven Monster-Zonen ändern
   setActiveMonsterZones(count: number): void {
     this.state.activeMonsterZones = this.validateMonsterZones(count);
+    this.notifyListeners();
   }
 
   // Würfel aus Aufmarsch und Monster-Zonen erschöpfen
@@ -121,6 +134,7 @@ class DiceManager {
     });
     // Reset des Würfel-Counters beim Erschöpfen
     this.state.rerollCounter = 0;
+    this.notifyListeners();
   }
 
   // Spiel zurücksetzen
@@ -130,6 +144,7 @@ class DiceManager {
       activeMonsterZones: 1,
       rerollCounter: 0
     };
+    this.notifyListeners();
   }
 
   // Würfel auswählen/abwählen
@@ -143,6 +158,7 @@ class DiceManager {
       }
       return dice;
     });
+    this.notifyListeners();
   }
 
   // Alle Würfel abwählen
@@ -151,6 +167,7 @@ class DiceManager {
       ...dice,
       selected: false
     }));
+    this.notifyListeners();
   }
 
   // Alle ausgewählten Würfel abrufen
@@ -173,6 +190,84 @@ class DiceManager {
       dice.value = this.rollDiceValue();
       dice.hidden = false;
       this.notifyListeners();
+    }
+  }
+
+  // Drag & Drop Logik
+  public handleDiceDrop(diceIds: string[], targetZone: DiceZone, isAddMonsterCard: boolean = false, activeMonsterZones: number = 0): void {
+    if (isAddMonsterCard) {
+      const newZone = `monster${activeMonsterZones + 1}` as DiceZone;
+      // Aktiviere zuerst die neue Monster-Zone
+      this.setActiveMonsterZones(activeMonsterZones + 1);
+      // Dann verschiebe die Würfel
+      this.moveDiceMultiple(diceIds, newZone);
+    } else {
+      this.moveDiceMultiple(diceIds, targetZone);
+    }
+    // Deselektiere alle Würfel nach dem Verschieben
+    this.clearDiceSelection();
+  }
+
+  public handleDiceDragStart(diceId: string): string[] {
+    const selectedDiceIds = this.state.dice.filter(d => d.selected).map(d => d.id);
+    return selectedDiceIds.length > 0 ? selectedDiceIds : [diceId];
+  }
+
+  // Würfel-Auswahl Logik
+  public handleDiceClick(diceId: string): void {
+    this.toggleDiceSelection(diceId);
+  }
+
+  public handleDiceDoubleClick(diceId: string): void {
+    this.selectedDiceForValue = diceId;
+    this.notifyListeners();
+  }
+
+  public getSelectedDiceForValue(): string | null {
+    return this.selectedDiceForValue;
+  }
+
+  public clearSelectedDiceForValue(): void {
+    this.selectedDiceForValue = null;
+    this.notifyListeners();
+  }
+
+  // Würfel-Wert-Änderung Logik
+  public handleValueSelect(value: number): void {
+    if (this.selectedDiceForValue) {
+      this.setDiceValue(this.selectedDiceForValue, value);
+      this.selectedDiceForValue = null;
+      this.notifyListeners();
+    }
+  }
+
+  public handleRandomRoll(): void {
+    if (this.selectedDiceForValue) {
+      this.rollDice(this.selectedDiceForValue);
+      this.selectedDiceForValue = null;
+      this.notifyListeners();
+    }
+  }
+
+  public handleDeleteZone(monsterNumber: number): void {
+    // Verschiebe alle Würfel aus der Monster-Zone in den Pool
+    const zoneName = `monster${monsterNumber}` as DiceZone;
+    const diceInZone = this.state.dice.filter(d => d.zone === zoneName);
+    
+    // Erschöpfe die Würfel
+    this.moveDiceMultiple(diceInZone.map(d => d.id), 'exhausted');
+    
+    // Verschiebe die Würfel aus den nachfolgenden Zonen nach oben
+    for (let i = monsterNumber; i < this.state.activeMonsterZones; i++) {
+      const currentZone = `monster${i + 1}` as DiceZone;
+      const nextZone = `monster${i}` as DiceZone;
+      const diceToMove = this.state.dice.filter(d => d.zone === currentZone);
+      this.moveDiceMultiple(diceToMove.map(d => d.id), nextZone);
+    }
+    
+    // Reduziere die Anzahl der aktiven Monster-Zonen
+    if (this.state.activeMonsterZones > 1) {
+      this.setActiveMonsterZones(this.state.activeMonsterZones - 1);
     }
   }
 }

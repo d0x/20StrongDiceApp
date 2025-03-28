@@ -4,36 +4,13 @@ import type { DiceZone } from '../types/dice';
 import { DiceWheel } from './DiceWheel';
 import { diceManager } from '../services/diceManager';
 import { Dice as DiceComponent } from './Dice';
-
-const getZoneName = (zone: DiceZone): string => {
-  switch (zone) {
-    case 'banished':
-      return 'Verbannt';
-    case 'exhausted':
-      return 'Erschöpft';
-    case 'muster':
-      return 'Aufmarsch';
-    case 'pool':
-      return 'Würfelpool';
-    case 'monster1':
-    case 'monster2':
-    case 'monster3':
-    case 'monster4':
-    case 'monster5':
-      return 'Monster';
-    default:
-      return zone;
-  }
-};
+import { getZoneName } from '../utils/viewUtils';
+import { getZoneStyle } from '../utils/styleUtils';
+import { useDiceManager } from '../hooks/useDiceManager';
+import { buttonStyles } from '../utils/theme';
 
 interface DiceZoneProps {
   zone: DiceZone;
-  dice: Dice[];
-  allDice: Dice[]; // Alle Würfel im Spiel
-  onDrop: (diceIds: string[], zone: DiceZone) => void;
-  onReroll?: (selectedDiceIds: string[], zone: DiceZone) => void;
-  rerollCount?: number;
-  onDiceSelect?: (diceId: string) => void;
   onDelete?: () => void;
   isAddMonsterCard?: boolean;
   onAddMonster?: () => void;
@@ -45,12 +22,6 @@ interface DiceZoneProps {
 
 export const DiceZoneComponent: React.FC<DiceZoneProps> = ({ 
   zone, 
-  dice,
-  allDice,
-  onDrop, 
-  onReroll, 
-  rerollCount, 
-  onDiceSelect,
   onDelete,
   isAddMonsterCard,
   onAddMonster,
@@ -59,7 +30,11 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
   style,
   activeMonsterZones = 0
 }) => {
-  const [selectedDiceForValue, setSelectedDiceForValue] = useState<string | null>(null);
+  const diceState = useDiceManager();
+  const selectedDiceForValue = diceManager.getSelectedDiceForValue();
+
+  const zoneDice = diceState.dice.filter(d => d.zone === zone);
+  const allDice = diceState.dice;
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -68,100 +43,48 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const diceIds = e.dataTransfer.getData('diceIds').split(',');
-    
-    if (isAddMonsterCard && onAddMonster) {
-      // Erstelle neue Monster-Zone und verschiebe die Würfel dorthin
-      onAddMonster();
-      const newZone = `monster${activeMonsterZones + 1}` as DiceZone;
-      onDrop(diceIds, newZone);
-    } else {
-      onDrop(diceIds, zone);
-    }
+    diceManager.handleDiceDrop(diceIds, zone, isAddMonsterCard, activeMonsterZones);
   };
 
   const handleDiceClick = (diceId: string, e: React.MouseEvent) => {
     e.preventDefault();
-    if (onDiceSelect) {
-      onDiceSelect(diceId);
-    }
+    diceManager.handleDiceClick(diceId);
   };
 
   const handleDiceDoubleClick = (diceId: string, e: React.MouseEvent) => {
     e.preventDefault();
-    setSelectedDiceForValue(diceId);
+    diceManager.handleDiceDoubleClick(diceId);
   };
 
   const handleDragStart = (e: React.DragEvent) => {
     const diceId = e.currentTarget.getAttribute('data-dice-id');
     if (!diceId) return;
-
-    // Verwende alle ausgewählten Würfel aus allen Zonen für den Drag & Drop
-    const selectedDiceIds = allDice.filter(d => d.selected).map(d => d.id);
-    const currentSelection = selectedDiceIds.length > 0 ? selectedDiceIds : [diceId];
-    e.dataTransfer.setData('diceIds', currentSelection.join(','));
+    const diceIds = diceManager.handleDiceDragStart(diceId);
+    e.dataTransfer.setData('diceIds', diceIds.join(','));
   };
 
   const handleReroll = () => {
-    if (onReroll) {
-      const selectedDiceIds = dice.filter(d => d.selected).map(d => d.id);
-      onReroll(selectedDiceIds, zone);
-    }
+    const selectedDiceIds = diceState.dice.filter(d => d.selected).map(d => d.id);
+    diceManager.rerollDiceInZone(zone, selectedDiceIds);
   };
 
   const handleZoneClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
-  const getZoneStyle = (): React.CSSProperties => {
-    const baseStyle: React.CSSProperties = {
-      border: '1px solid #444',
-      borderRadius: '4px',
-      padding: '10px',
-      minHeight: '100px',
-      backgroundColor: '#1a1a1a',
-      color: '#fff',
-      ...style
-    };
-
-    switch (zone) {
-      case 'muster':
-        return { ...baseStyle, backgroundColor: '#1b2a1b' };
-      case 'exhausted':
-        return { ...baseStyle, backgroundColor: '#2a1f1b' };
-      case 'banished':
-        return { ...baseStyle, backgroundColor: '#2a1b1b' };
-      case 'pool':
-        return { ...baseStyle, backgroundColor: '#1b1f2a' };
-      case 'monster1':
-      case 'monster2':
-      case 'monster3':
-      case 'monster4':
-      case 'monster5':
-        return { ...baseStyle, backgroundColor: '#2a1b2a' };
-      default:
-        return baseStyle;
-    }
-  };
-
   const handleValueSelect = (value: number) => {
-    if (selectedDiceForValue) {
-      diceManager.setDiceValue(selectedDiceForValue, value);
-      setSelectedDiceForValue(null);
-    }
+    diceManager.handleValueSelect(value);
   };
 
   const handleRandomRoll = () => {
-    if (selectedDiceForValue) {
-      diceManager.rollDice(selectedDiceForValue);
-      setSelectedDiceForValue(null);
-    }
+    diceManager.handleRandomRoll();
   };
 
   return (
     <>
       <div
         data-zone={zone}
-        style={getZoneStyle()}
+        style={getZoneStyle(zone, style)}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={handleZoneClick}
@@ -169,37 +92,29 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
         <div style={{ marginBottom: '5px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>{isAddMonsterCard ? 'Neue Monster-Zone' : getZoneName(zone)}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {(zone === 'muster' || zone === 'exhausted') && onReroll && (
+            {(zone === 'muster' || zone === 'exhausted') && (
               <>
                 {zone === 'muster' && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <button
                       onClick={onDecrementCounter}
                       style={{
-                        padding: '2px 6px',
-                        backgroundColor: '#ff4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '12px'
+                        ...buttonStyles.base,
+                        ...buttonStyles.small,
+                        ...buttonStyles.danger
                       }}
                     >
                       -
                     </button>
                     <span style={{ fontSize: '12px', color: '#666' }}>
-                      Würfe: {rerollCount || 0}
+                      Würfe: {diceState.rerollCounter}
                     </span>
                     <button
                       onClick={onIncrementCounter}
                       style={{
-                        padding: '2px 6px',
-                        backgroundColor: '#4CAF50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '12px'
+                        ...buttonStyles.base,
+                        ...buttonStyles.small,
+                        ...buttonStyles.primary
                       }}
                     >
                       +
@@ -209,13 +124,8 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
                 <button
                   onClick={handleReroll}
                   style={{
-                    padding: '4px 8px',
-                    backgroundColor: '#4CAF50',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px'
+                    ...buttonStyles.base,
+                    ...buttonStyles.primary
                   }}
                 >
                   Neu Würfeln
@@ -226,13 +136,8 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
               <button
                 onClick={onDelete}
                 style={{
-                  padding: '4px 8px',
-                  backgroundColor: '#ff4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
+                  ...buttonStyles.base,
+                  ...buttonStyles.danger
                 }}
               >
                 🗑️
@@ -242,13 +147,8 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
               <button
                 onClick={onAddMonster}
                 style={{
-                  padding: '4px 8px',
-                  backgroundColor: '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
+                  ...buttonStyles.base,
+                  ...buttonStyles.primary
                 }}
               >
                 +
@@ -258,7 +158,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
         </div>
         {!isAddMonsterCard && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-            {dice.map(die => (
+            {zoneDice.map(die => (
               <DiceComponent
                 key={die.id}
                 die={die}
@@ -272,7 +172,7 @@ export const DiceZoneComponent: React.FC<DiceZoneProps> = ({
       </div>
       <DiceWheel
         isOpen={!!selectedDiceForValue}
-        onClose={() => setSelectedDiceForValue(null)}
+        onClose={() => diceManager.clearSelectedDiceForValue()}
         onSelect={handleValueSelect}
         onRandom={handleRandomRoll}
       />
